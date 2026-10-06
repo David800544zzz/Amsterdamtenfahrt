@@ -32,6 +32,7 @@ import {
 } from '@/lib/supabase';
 import { PHOTO_SPOTS, POLL_QUESTIONS, MAX_POINTS } from '@/lib/data';
 import AdminControls from '@/components/AdminControls';
+import ImageModal from '@/components/ImageModal';
 
 type ResultsPageProps = {
   currentUser: GrachtenUser;
@@ -59,6 +60,7 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
   const [voterLikes, setVoterLikes] = useState<string[]>([]);
   const [voterFavorites, setVoterFavorites] = useState<string[]>([]);
   const [disabledItems, setDisabledItems] = useState<DisabledSet>({ photoSpots: new Set(), pollQuestions: new Set() });
+  const [modalSrc, setModalSrc] = useState<string | null>(null);
 
   useEffect(() => {
     loadResults();
@@ -508,7 +510,8 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
                                 <img
                                   src={getPhotoUrl(photo.storage_path)}
                                   alt={PHOTO_SPOTS[photo.spot_index]?.label ?? 'Photo'}
-                                  className="w-full aspect-square object-cover rounded-xl"
+                                  className="w-full aspect-square object-cover rounded-xl cursor-zoom-in transition-transform hover:scale-[1.03]"
+                                  onClick={() => setModalSrc(getPhotoUrl(photo.storage_path))}
                                 />
                                 <p className="text-white/60 text-[10px] mt-1 truncate">
                                   {PHOTO_SPOTS[photo.spot_index]?.label ?? 'Bonus'}
@@ -542,7 +545,8 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
                                 <img
                                   src={getPhotoUrl(photo.storage_path)}
                                   alt="Bonus"
-                                  className="w-full aspect-square object-cover rounded-xl"
+                                  className="w-full aspect-square object-cover rounded-xl cursor-zoom-in transition-transform hover:scale-[1.03]"
+                                  onClick={() => setModalSrc(getPhotoUrl(photo.storage_path))}
                                 />
                                 {isAdmin && (
                                   <button
@@ -649,6 +653,9 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
           </div>
         )}
       </div>
+      {modalSrc && (
+        <ImageModal src={modalSrc} onClose={() => setModalSrc(null)} />
+      )}
     </div>
   );
 }

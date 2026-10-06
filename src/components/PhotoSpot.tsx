@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
-import { Camera, Check } from 'lucide-react';
+import { Camera, Check, Maximize2 } from 'lucide-react';
 import { supabase, PHOTO_BUCKET, type GrachtenUser } from '@/lib/supabase';
+import ImageModal from '@/components/ImageModal';
 
 type PhotoSpotProps = {
   spotIndex: number;
@@ -25,6 +26,7 @@ export default function PhotoSpot({
   const [uploading, setUploading] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(existingPhotoUrl);
   const [showDetail, setShowDetail] = useState(false);
+  const [modalSrc, setModalSrc] = useState<string | null>(null);
 
   const handleFile = async (file: File) => {
     setUploading(true);
@@ -85,8 +87,16 @@ export default function PhotoSpot({
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
               <Camera className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
             </div>
-            <div className="absolute top-2 right-2 bg-green-700 rounded-full p-1">
-              <Check className="w-4 h-4 text-white" strokeWidth={2.5} />
+            <div className="absolute top-2 right-2 flex items-center gap-1">
+              <button
+                onClick={(e) => { e.stopPropagation(); setModalSrc(photoUrl); }}
+                className="bg-green-700 rounded-full p-1 hover:bg-green-800 transition-colors"
+              >
+                <Maximize2 className="w-4 h-4 text-white" strokeWidth={2} />
+              </button>
+              <div className="bg-green-700 rounded-full p-1">
+                <Check className="w-4 h-4 text-white" strokeWidth={2.5} />
+              </div>
             </div>
           </>
         ) : (
@@ -108,6 +118,9 @@ export default function PhotoSpot({
         <div className="bg-green-600 rounded-2xl px-3 py-2 animate-slide-in-left">
           <p className="text-white text-xs leading-relaxed">{detail}</p>
         </div>
+      )}
+      {modalSrc && (
+        <ImageModal src={modalSrc} onClose={() => setModalSrc(null)} />
       )}
     </div>
   );
