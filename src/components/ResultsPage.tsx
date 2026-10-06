@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Trophy,
+  Crown,
   Image as ImageIcon,
   FileText,
   ListChecks,
@@ -61,6 +62,7 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
   const [voterFavorites, setVoterFavorites] = useState<string[]>([]);
   const [disabledItems, setDisabledItems] = useState<DisabledSet>({ photoSpots: new Set(), pollQuestions: new Set() });
   const [modalSrc, setModalSrc] = useState<string | null>(null);
+  const [adminData, setAdminData] = useState<RankedUser | null>(null);
 
   useEffect(() => {
     loadResults();
@@ -99,11 +101,9 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
       setVoterLikes(myLikes);
       setVoterFavorites(myFavs);
 
-      const visibleUsers = isAdmin
-        ? allUsers
-        : allUsers.filter((u) => u.username !== ADMIN_USERNAME);
+      const visibleUsers = allUsers.filter((u) => u.username !== ADMIN_USERNAME);
 
-      const ranked: RankedUser[] = visibleUsers.map((u) => {
+      const buildRanked = (u: GrachtenUser): RankedUser => {
         const userLikeCount = likes.filter(
           (l) => l.target_user_id === u.id && l.voter_id !== u.id,
         ).length;
@@ -142,11 +142,20 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
           voterReward,
           displayScore,
         };
-      });
+      };
+
+      const adminUser = allUsers.find((u) => u.username === ADMIN_USERNAME);
+      if (adminUser) {
+        setAdminData(buildRanked(adminUser));
+      }
+
+      const ranked: RankedUser[] = visibleUsers.map((u) => buildRanked(u));
 
       ranked.sort((a, b) => b.displayScore - a.displayScore);
       setUsers(ranked);
-      setExpandedUser(currentUser.id);
+      if (!isAdmin) {
+        setExpandedUser(currentUser.id);
+      }
     } catch (err) {
       console.error('Failed to load results:', err);
     } finally {
@@ -378,10 +387,142 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
           Zurück zu meiner Seite
         </button>
 
-        {users.length === 0 ? (
+        {users.length === 0 && !adminData ? (
           <p className="text-green-600 text-center py-8">Noch keine Ergebnisse.</p>
         ) : (
           <div className="flex flex-col gap-4">
+            {/* Admin hovering card above the leaderboard */}
+            {isAdmin && adminData && (
+              <div className="bg-green-800 rounded-3xl overflow-hidden ring-2 ring-tan-300 shadow-lg">
+                <button
+                  onClick={() => setExpandedUser(expandedUser === adminData.id ? null : adminData.id)}
+                  className="w-full flex items-center justify-between p-5 hover:bg-green-900 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center justify-center w-9 h-9 rounded-full bg-tan-200 text-green-800 text-sm font-bold">
+                      <Crown className="w-5 h-5" strokeWidth={1.5} />
+                    </span>
+                    <div className="text-left">
+                      <p className="text-white font-semibold text-base">
+                        {adminData.username}
+                        <span className="text-tan-200 text-xs ml-2">(Admin)</span>
+                      </p>
+                      <p className="text-xs font-semibold text-white/60">
+                        {adminData.displayScore} / {MAX_POINTS} Punkte
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 text-white/60 transition-transform ${expandedUser === adminData.id ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {expandedUser === adminData.id && (
+                  <div className="px-5 pb-5 max-h-[600px] overflow-y-auto">
+                    {adminData.photos.filter((p) => p.spot_index < BONUS_SPOT_BASE).length > 0 && (
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ImageIcon className="w-4 h-4 text-white/70" strokeWidth={1.5} />
+                          <p className="text-white/70 text-xs font-medium">Foto-Stops</p>
+                        </div>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {adminData.photos
+                            .filter((p) => p.spot_index < BONUS_SPOT_BASE)
+                            .sort((a, b) => a.spot_index - b.spot_index)
+                            .map((photo) => (
+                              <div key={photo.id} className="relative group/photo">
+                                <img
+                                  src={getPhotoUrl(photo.storage_path)}
+                                  alt={PHOTO_SPOTS[photo.spot_index]?.label ?? 'Photo'}
+                                  className="w-full aspect-square object-cover rounded-xl cursor-zoom-in transition-transform hover:scale-[1.03]"
+                                  onClick={() => setModalSrc(getPhotoUrl(photo.storage_path))}
+                                />
+                                <p className="text-white/60 text-[10px] mt-1 truncate">
+                                  {PHOTO_SPOTS[photo.spot_index]?.label ?? 'Bonus'}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                    {adminData.photos.filter((p) => p.spot_index >= BONUS_SPOT_BASE).length > 0 && (
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ImageIcon className="w-4 h-4 text-white/70" strokeWidth={1.5} />
+                          <p className="text-white/70 text-xs font-medium">Bonus-Fotos</p>
+                        </div>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {adminData.photos
+                            .filter((p) => p.spot_index >= BONUS_SPOT_BASE)
+                            .sort((a, b) => a.spot_index - b.spot_index)
+                            .map((photo) => (
+                              <div key={photo.id} className="relative group/photo">
+                                <img
+                                  src={getPhotoUrl(photo.storage_path)}
+                                  alt="Bonus"
+                                  className="w-full aspect-square object-cover rounded-xl cursor-zoom-in transition-transform hover:scale-[1.03]"
+                                  onClick={() => setModalSrc(getPhotoUrl(photo.storage_path))}
+                                />
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                    {adminData.pollAnswers.length > 0 && (
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ListChecks className="w-4 h-4 text-white/70" strokeWidth={1.5} />
+                          <p className="text-white/70 text-xs font-medium">Quiz-Ergebnisse</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {adminData.pollAnswers
+                            .sort((a, b) => a.poll_index - b.poll_index)
+                            .map((ans) => {
+                              const poll = POLL_QUESTIONS[ans.poll_index];
+                              if (!poll) return null;
+                              return (
+                                <div key={ans.id} className="bg-green-700 rounded-xl p-3">
+                                  <p className="text-white text-xs mb-1">
+                                    {ans.poll_index + 1}. {poll.question}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-white/60 text-xs">
+                                      Antwort: {poll.options[ans.selected_option]}
+                                    </p>
+                                    <span
+                                      className={`text-xs font-bold ${
+                                        ans.is_correct ? 'text-green-300' : 'text-red-300'
+                                      }`}
+                                    >
+                                      {ans.is_correct ? 'Richtig' : 'Falsch'}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+                    {adminData.textEntry && (
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="w-4 h-4 text-white/70" strokeWidth={1.5} />
+                          <p className="text-white/70 text-xs font-medium">Ihre Gedanken</p>
+                        </div>
+                        <div className="bg-green-700 rounded-xl p-3">
+                          <p className="text-white text-sm leading-relaxed">{adminData.textEntry.content}</p>
+                        </div>
+                      </div>
+                    )}
+                    {adminData.photos.length === 0 && adminData.pollAnswers.length === 0 && !adminData.textEntry && (
+                      <p className="text-white/50 text-sm text-center py-4">
+                        Noch keine Beiträge.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {users.map((u, rank) => {
               const isExpanded = expandedUser === u.id;
               const isCurrentUser = u.id === currentUser.id;
