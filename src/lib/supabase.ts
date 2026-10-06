@@ -59,3 +59,25 @@ export const MAX_FAVORITES = 1;
 export const LIKE_POINTS = 1;
 export const FAVORITE_POINTS = 2;
 export const VOTER_REWARD = 1;
+
+export type DisabledItem = {
+  id: string;
+  item_type: 'photo_spot' | 'poll_question';
+  item_index: number;
+  created_at: string;
+};
+
+export type DisabledSet = {
+  photoSpots: Set<number>;
+  pollQuestions: Set<number>;
+};
+
+export function parseDisabledItems(items: DisabledItem[]): DisabledSet {
+  const photoSpots = new Set<number>();
+  const pollQuestions = new Set<number>();
+  for (const item of items) {
+    if (item.item_type === 'photo_spot') photoSpots.add(item.item_index);
+    else if (item.item_type === 'poll_question') pollQuestions.add(item.item_index);
+  }
+  return { photoSpots, pollQuestions };
+}

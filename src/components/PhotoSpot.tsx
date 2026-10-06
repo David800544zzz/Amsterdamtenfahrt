@@ -9,6 +9,7 @@ type PhotoSpotProps = {
   user: GrachtenUser;
   existingPhotoUrl: string | null;
   onUploaded: (url: string) => void;
+  disabled?: boolean;
 };
 
 export default function PhotoSpot({
@@ -18,6 +19,7 @@ export default function PhotoSpot({
   user,
   existingPhotoUrl,
   onUploaded,
+  disabled = false,
 }: PhotoSpotProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -67,13 +69,13 @@ export default function PhotoSpot({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="bg-green-600 rounded-2xl px-3 py-2 self-start max-w-full">
+    <div className={`flex flex-col gap-2 transition-all ${disabled ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+      <div className={`rounded-2xl px-3 py-2 self-start max-w-full ${disabled ? 'bg-gray-400' : 'bg-green-600'}`}>
         <p className="text-white text-xs font-medium truncate">{label}</p>
       </div>
       <div
-        className="bg-green-600 rounded-2xl aspect-square flex items-center justify-center cursor-pointer overflow-hidden relative group transition-all hover:bg-green-500"
-        onClick={() => !uploading && fileRef.current?.click()}
+        className={`rounded-2xl aspect-square flex items-center justify-center overflow-hidden relative group transition-all ${disabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-600 cursor-pointer hover:bg-green-500'}`}
+        onClick={() => !uploading && !disabled && fileRef.current?.click()}
       >
         {uploading ? (
           <div className="w-8 h-8 border-3 border-tan-100 border-t-transparent rounded-full animate-spin" />

@@ -10,6 +10,9 @@ import {
   type GrachtenPhoto,
   type GrachtenPollAnswer,
   type GrachtenTextEntry,
+  type DisabledItem,
+  type DisabledSet,
+  parseDisabledItems,
 } from '@/lib/supabase';
 import {
   TRIP_DESCRIPTION,
@@ -22,6 +25,7 @@ import BonusUpload from '@/components/BonusUpload';
 import TextEntry from '@/components/TextEntry';
 import ProgressBar from '@/components/ProgressBar';
 import LeaderboardBar from '@/components/LeaderboardBar';
+import AdminControls from '@/components/AdminControls';
 
 type HomePageProps = {
   user: GrachtenUser;
@@ -41,11 +45,18 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
   const [score, setScore] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [disabledItems, setDisabledItems] = useState<DisabledSet>({ photoSpots: new Set(), pollQuestions: new Set() });
+  const isAdmin = user.username === ADMIN_USERNAME;
 
   const computeScore = useCallback(
-    (photos: PhotoUrls, polls: PollAnswers, bonus: number, saved: boolean) => {
-      const photoPoints = Object.keys(photos).filter((k) => parseInt(k) < BONUS_SPOT_BASE).length;
-      const pollPoints = Object.values(polls).filter((p) => p.correct).length;
+    (photos: PhotoUrls, polls: PollAnswers, bonus: number, saved: boolean, disabled: DisabledSet) => {
+      const photoPoints = Object.keys(photos)
+        .filter((k) => {
+          const idx = parseInt(k);
+          return idx < BONUS_SPOT_BASE && !disabled.photoSpots.has(idx);
+        }).length;
+      const pollPoints = Object.entries(polls)
+        .filter(([k, p]) => p.correct && !disabled.pollQuestions.has(parseInt(k))).length;
       const bonusPoints = Math.min(bonus, MAX_BONUS_UPLOADS);
       const textPoint = saved ? 1 : 0;
       return photoPoints + pollPoints + bonusPoints + textPoint;
@@ -56,7 +67,17 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
   useEffect(() => {
     loadExistingData();
     loadLeaderboard();
+    loadDisabledItems();
   }, []);
+
+  const loadDisabledItems = async () => {
+    const { data, error } = await supabase.from('disabled_items').select('*');
+    if (error) {
+      console.error('Failed to load disabled items:', error);
+      return;
+    }
+    setDisabledItems(parseDisabledItems((data || []) as DisabledItem[]));
+  };
 
   const loadLeaderboard = async () => {
     const { data, error } = await supabase
@@ -105,7 +126,7 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
       setPhotoUrls(urls);
       setPollAnswers(answers);
       setBonusCount(bonus);
-      const s = computeScore(urls, answers, bonus, hasText);
+      const s = computeScore(urls, answers, bonus, hasText, disabledItems);
       setScore(s);
     } catch (err) {
       console.error('Failed to load data:', err);
@@ -115,7 +136,7 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
   };
 
   const updateScore = async (photos: PhotoUrls, polls: PollAnswers, bonus: number, saved: boolean) => {
-    const s = computeScore(photos, polls, bonus, saved);
+    const s = computeScore(photos, polls, bonus, saved, disabledItems);
     setScore(s);
     const { error } = await supabase.from('grachten_users').update({ total_score: s }).eq('id', user.id);
     if (error) {
@@ -123,6 +144,20 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
       return;
     }
     await loadLeaderboard();
+  };
+
+  const handleAdminChanged = async () => {
+    const { data, error } = await supabase.from('disabled_items').select('*');
+    if (error) {
+      console.error('Failed to reload disabled items:', error);
+      return;
+    }
+    const newDisabled = parseDisabledItems((data || []) as DisabledItem[]);
+    setDisabledItems(newDisabled);
+    const s = computeScore(photoUrls, pollAnswers, bonusCount, textSaved, newDisabled);
+    setScore(s);
+    const { error: updateError } = await supabase.from('grachten_users').update({ total_score: s }).eq('id', user.id);
+    if (!updateError) await loadLeaderboard();
   };
 
   const handlePhotoUploaded = (spotIndex: number, url: string) => {
@@ -181,13 +216,18 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
           <div className="flex items-center gap-2">
             <Ship className="w-6 h-6 text-green-600" strokeWidth={1.5} />
           </div>
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-700 text-white text-sm font-medium hover:bg-green-800 transition-colors"
-          >
-            <LogOut className="w-4 h-4" strokeWidth={1.5} />
-            Abmelden
-          </button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <AdminControls disabled={disabledItems} onChanged={handleAdminChanged} />
+            )}
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-700 text-white text-sm font-medium hover:bg-green-800 transition-colors"
+            >
+              <LogOut className="w-4 h-4" strokeWidth={1.5} />
+              Abmelden
+            </button>
+          </div>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-green-700 mb-6">
           Amsterdam Grachtenfahrt
@@ -228,6 +268,7 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
               user={user}
               existingPhotoUrl={photoUrls[i] ?? null}
               onUploaded={(url) => handlePhotoUploaded(i, url)}
+              disabled={disabledItems.photoSpots.has(i)}
             />
           ))}
         </div>
@@ -245,6 +286,7 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
               selectedOption={pollAnswers[i]?.selected ?? null}
               isCorrect={pollAnswers[i]?.correct ?? null}
               onSelect={(opt) => handlePollAnswer(i, opt)}
+              disabled={disabledItems.pollQuestions.has(i)}
             />
           ))}
         </div>

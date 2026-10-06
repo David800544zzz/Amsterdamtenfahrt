@@ -7,6 +7,7 @@ type PollCardProps = {
   selectedOption: number | null;
   isCorrect: boolean | null;
   onSelect: (optionIndex: number) => void;
+  disabled?: boolean;
 };
 
 export default function PollCard({
@@ -15,12 +16,13 @@ export default function PollCard({
   selectedOption,
   isCorrect,
   onSelect,
+  disabled = false,
 }: PollCardProps) {
   const answered = selectedOption !== null;
 
   return (
-    <div className="bg-green-600 rounded-2xl p-4 sm:p-5">
-      <p className="text-white text-sm sm:text-base font-medium mb-3">
+    <div className={`rounded-2xl p-4 sm:p-5 transition-all ${disabled ? 'bg-gray-300 opacity-60' : 'bg-green-600'}`}>
+      <p className={`text-sm sm:text-base font-medium mb-3 ${disabled ? 'text-gray-500' : 'text-white'}`}>
         {pollIndex + 1}. {poll.question}
       </p>
       <div className="grid grid-cols-1 gap-2">
@@ -32,10 +34,12 @@ export default function PollCard({
           return (
             <button
               key={i}
-              disabled={answered}
+              disabled={answered || disabled}
               onClick={() => onSelect(i)}
               className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all duration-300 ${
-                showCorrect
+                disabled
+                  ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
+                  : showCorrect
                   ? 'bg-white text-green-700 font-semibold'
                   : showWrong
                   ? 'bg-white text-red-500 font-semibold'

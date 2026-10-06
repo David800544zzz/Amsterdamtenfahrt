@@ -26,8 +26,12 @@ import {
   type GrachtenTextEntry,
   type GrachtenLike,
   type GrachtenFavorite,
+  type DisabledItem,
+  type DisabledSet,
+  parseDisabledItems,
 } from '@/lib/supabase';
 import { PHOTO_SPOTS, POLL_QUESTIONS, MAX_POINTS } from '@/lib/data';
+import AdminControls from '@/components/AdminControls';
 
 type ResultsPageProps = {
   currentUser: GrachtenUser;
@@ -54,6 +58,7 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
   const [allFavorites, setAllFavorites] = useState<GrachtenFavorite[]>([]);
   const [voterLikes, setVoterLikes] = useState<string[]>([]);
   const [voterFavorites, setVoterFavorites] = useState<string[]>([]);
+  const [disabledItems, setDisabledItems] = useState<DisabledSet>({ photoSpots: new Set(), pollQuestions: new Set() });
 
   useEffect(() => {
     loadResults();
@@ -61,13 +66,14 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
 
   const loadResults = async () => {
     try {
-      const [usersRes, photosRes, pollsRes, textsRes, likesRes, favsRes] = await Promise.all([
+      const [usersRes, photosRes, pollsRes, textsRes, likesRes, favsRes, disabledRes] = await Promise.all([
         supabase.from('grachten_users').select('*').order('total_score', { ascending: false }),
         supabase.from('grachten_photos').select('*'),
         supabase.from('grachten_poll_answers').select('*'),
         supabase.from('grachten_text_entries').select('*'),
         supabase.from('grachten_post_likes').select('*'),
         supabase.from('grachten_post_favorites').select('*'),
+        supabase.from('disabled_items').select('*'),
       ]);
 
       const allUsers = (usersRes.data || []) as GrachtenUser[];
@@ -76,6 +82,8 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
       const allTexts = (textsRes.data || []) as GrachtenTextEntry[];
       const likes = (likesRes.data || []) as GrachtenLike[];
       const favorites = (favsRes.data || []) as GrachtenFavorite[];
+      const disabled = parseDisabledItems((disabledRes.data || []) as DisabledItem[]);
+      setDisabledItems(disabled);
 
       setAllLikes(likes);
       setAllFavorites(favorites);
@@ -107,7 +115,17 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
         const voterReward =
           myLikesGiven >= MAX_LIKES && myFavsGiven >= MAX_FAVORITES ? VOTER_REWARD : 0;
 
-        const baseScore = u.total_score;
+        const photoPoints = allPhotos.filter(
+          (p) => p.user_id === u.id && p.spot_index < BONUS_SPOT_BASE && !disabled.photoSpots.has(p.spot_index),
+        ).length;
+        const bonusPhotoPoints = allPhotos.filter(
+          (p) => p.user_id === u.id && p.spot_index >= BONUS_SPOT_BASE,
+        ).length;
+        const pollPoints = allPolls.filter(
+          (p) => p.user_id === u.id && p.is_correct && !disabled.pollQuestions.has(p.poll_index),
+        ).length;
+        const textPoint = allTexts.find((t) => t.user_id === u.id) ? 1 : 0;
+        const baseScore = photoPoints + bonusPhotoPoints + pollPoints + textPoint;
         const bonusFromLikes = userLikeCount * LIKE_POINTS;
         const bonusFromFavs = userFavCount * FAVORITE_POINTS;
         const displayScore = baseScore + bonusFromLikes + bonusFromFavs + voterReward;
@@ -303,13 +321,18 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
           <div className="flex items-center gap-2">
             <Trophy className="w-6 h-6 text-green-600" strokeWidth={1.5} />
           </div>
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-700 text-white text-sm font-medium hover:bg-green-800 transition-colors"
-          >
-            <LogOut className="w-4 h-4" strokeWidth={1.5} />
-            Abmelden
-          </button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <AdminControls disabled={disabledItems} onChanged={loadResults} />
+            )}
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-700 text-white text-sm font-medium hover:bg-green-800 transition-colors"
+            >
+              <LogOut className="w-4 h-4" strokeWidth={1.5} />
+              Abmelden
+            </button>
+          </div>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-green-700 mb-2">
           Rangliste
