@@ -66,7 +66,7 @@ function RollingValue({ value, className = '' }: RollingValueProps) {
 
 export default function LeaderboardBar({ score, rank, topUsers }: LeaderboardBarProps) {
   return (
-    <div className="fixed bottom-3 left-1/2 z-40 flex h-[88px] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 items-center rounded-3xl bg-white px-4 shadow-[0_8px_28px_rgba(31,46,34,0.16)] sm:bottom-5 sm:h-[96px] sm:px-6">
+    <div className="fixed bottom-3 left-1/2 z-40 flex h-[88px] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 items-center rounded-3xl bg-white px-4 shadow-[4px_4px_12px_rgba(0,0,0,0.12)] sm:bottom-5 sm:h-[96px] sm:px-6">
       <div className="w-16 shrink-0 text-left sm:w-24">
         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-green-700">Punkte</p>
         <p className="text-2xl font-bold leading-none text-black sm:text-3xl">
