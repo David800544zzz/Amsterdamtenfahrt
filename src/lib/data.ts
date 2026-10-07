@@ -42,54 +42,69 @@ export type PollQuestion = {
 
 export const POLL_QUESTIONS: PollQuestion[] = [
   {
-    question: 'Wie viele Grachten gibt es in Amsterdam?',
-    options: ['Etwa 65', 'Etwa 100', 'Etwa 165', 'Etwa 250'],
-    correctIndex: 2,
-  },
-  {
-    question: 'Was bedeutet „gracht" auf Niederländisch?',
-    options: ['Brücke', 'Gracht', 'Straße', 'Hafen'],
-    correctIndex: 1,
-  },
-  {
-    question: 'Welcher Fluss fließt durch Amsterdam?',
-    options: ['Rhein', 'Maas', 'Amstel', 'IJssel'],
-    correctIndex: 2,
-  },
-  {
-    question: 'Wie viele Brücken gibt es in Amsterdam?',
-    options: ['Etwa 400', 'Etwa 800', 'Etwa 1.200', 'Etwa 1.800'],
+    question: 'Wie viele Jahre sind im Amsterdamer Stadsarchiv dokumentiert?',
+    options: ['650 Jahre', '480 Jahre', '530 Jahre', '750 Jahre'],
     correctIndex: 3,
   },
   {
-    question: 'Wann wurde die Magere Brug erstmals gebaut?',
-    options: ['1691', '1740', '1815', '1875'],
-    correctIndex: 0,
-  },
-  {
-    question: 'Welches Museum befindet sich am Museumplein?',
-    options: ['Anne-Frank-Haus', 'Rijksmuseum', 'NEMO', 'Het Scheepvaartmuseum'],
+    question: 'Wann wurde Amsterdam Centraal eröffnet?',
+    options: ['1. September 1906', '15. Oktober 1889', '24. Dezember 1994', '9. Juli 1871'],
     correctIndex: 1,
   },
   {
-    question: 'Wofür werden die Hausboote auf den Grachten genutzt?',
-    options: ['Nur Lagerung', 'Wohnräume', 'Touristenläden', 'Restaurants'],
+    question: 'In welchem Baustil ist Amsterdam Centraal gebaut?',
+    options: [
+      'Jugendstil (mit Einflüssen der Neorenaissance)',
+      'Neorenaissance (mit Einflüssen der Neogotik)',
+      'Historismus (mit Einflüssen des Eklektizismus)',
+      'Klassizismus (mit Einflüssen des Jugendstils)',
+    ],
     correctIndex: 1,
   },
   {
-    question: 'Wie viele Fahrräder gibt es schätzungsweise in Amsterdam?',
-    options: ['Etwa 300.000', 'Etwa 500.000', 'Etwa 881.000', 'Etwa 1,2 Millionen'],
+    question: 'Was sind die Themen des NEMO Science Museums?',
+    options: [
+      'Geologie, Petroleumgeologie, Erdölgeologie',
+      'Ozeanographie, Meeresbiologie, Maritime Meteorologie',
+      'Physik, Chemie, Biologie und Technik',
+      'Funghi, Napoletana, Quattro Fermenti, Marinara, Margherita',
+    ],
     correctIndex: 2,
   },
   {
-    question: 'Was ist ein „grachtenpand"?',
-    options: ['Eine Art Boot', 'Ein Grachtenhaus', 'Ein Blumenmarkt', 'Eine Brücke'],
+    question: 'Wie tief sind die Grachten im Durchschnitt?',
+    options: ['1,20 Meter', '3,60 Meter', '2,4 Meter', '2,9 Meter'],
+    correctIndex: 2,
+  },
+  {
+    question: 'Wie viele Fahrräder werden durchschnittlich jährlich aus den Grachten gezogen?',
+    options: ['5.000–10.000', '10.000–15.000', '1.000–5.000', '15.000–20.000'],
     correctIndex: 1,
   },
   {
-    question: 'Welches UNESCO-Weltkulturerbe umfasst die Grachten?',
-    options: ['Der Grachtengürtel', 'Der Dam-Platz', 'Das Rotlichtviertel', 'Der Hafen'],
+    question: 'Auf wie vielen Pfählen steht der königliche Palast in Amsterdam?',
+    options: ['13.659', '19.114', '31.120', '9.608'],
     correctIndex: 0,
+  },
+  {
+    question: 'In welchem Jahr wurden die ersten touristischen Grachtenfahrten angeboten?',
+    options: ['1901', '1912', '1878', '2003'],
+    correctIndex: 1,
+  },
+  {
+    question: 'Wie viele Touristen nehmen in Amsterdam jährlich an einer Grachtenfahrt teil?',
+    options: ['1.000.000 – 2.000.000', '2.500.000', '3.000.000 – 5.000.000', '6.000.000'],
+    correctIndex: 2,
+  },
+  {
+    question: 'Warum konnten sich die touristischen Grachtenfahrten anfangs nicht durchsetzen?',
+    options: [
+      'Der Betrieb der Boote war zu teuer',
+      'Der Geruch der Grachten war zu unangenehm, da sie zu dieser Zeit noch als Kanalisation genutzt wurden',
+      'Nachdem zwei Grachtenboote bei einem Unfall kollidierten und mehrere Menschen ums Leben kamen, wurden touristische Grachtenfahrten vorübergehend verboten',
+      'Anfangs bestand kaum Interesse an diesem Angebot',
+    ],
+    correctIndex: 1,
   },
 ];
 
