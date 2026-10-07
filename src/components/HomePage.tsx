@@ -257,7 +257,7 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
 
       {/* Photo spots */}
       <div className="max-w-3xl mx-auto px-4 mb-8">
-        <h2 className="text-green-700 text-lg font-semibold mb-4">Foto-Stops</h2>
+        <h2 className="text-green-700 text-lg font-semibold mb-4">Fotografiere möglichst viele der folgenden Sehenswürdigkeiten!</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {PHOTO_SPOTS.map((spot, i) => (
             <PhotoSpot
