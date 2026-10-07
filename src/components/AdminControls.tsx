@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Settings, X, Eye, EyeOff, Camera, HelpCircle } from 'lucide-react';
 import { supabase, type DisabledSet } from '@/lib/supabase';
-import { PHOTO_SPOTS, POLL_QUESTIONS } from '@/lib/data';
+import { PHOTO_SPOTS, THINGS_SPOTS, POLL_QUESTIONS } from '@/lib/data';
 
 type AdminControlsProps = {
   disabled: DisabledSet;
@@ -109,6 +109,40 @@ export default function AdminControls({ disabled, onChanged }: AdminControlsProp
                         <EyeOff className="w-4 h-4 shrink-0 text-gray-500" strokeWidth={1.5} />
                       ) : (
                         <Eye className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Things spots */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Camera className="w-5 h-5 text-green-600" strokeWidth={1.5} />
+                <h3 className="text-green-700 font-semibold">Dinge-Fotos</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {THINGS_SPOTS.map((spot, i) => {
+                  const spotIndex = PHOTO_SPOTS.length + i;
+                  const isDisabled = disabled.photoSpots.has(spotIndex);
+                  const isBusy = busy === spotIndex;
+                  return (
+                    <button
+                      key={spotIndex}
+                      onClick={() => togglePhotoSpot(spotIndex)}
+                      disabled={isBusy}
+                      className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
+                        isDisabled
+                          ? 'bg-gray-300 text-gray-500'
+                          : 'bg-green-600 text-white hover:bg-green-700'
+                      }`}
+                    >
+                      <span className="truncate mr-2">{i + 1}. {spot.label}</span>
+                      {isDisabled ? (
+                        <EyeOff className="w-4 h-4 shrink-0 text-gray-500" strokeWidth={1.5} />
+                      ) : (
+                        <Eye className="w-4 h-4 shrink-0 text-green-100" strokeWidth={1.5} />
                       )}
                     </button>
                   );

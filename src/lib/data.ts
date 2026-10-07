@@ -1,4 +1,4 @@
-export const TRIP_DESCRIPTION = `Willkommen zur Amsterdam Grachtenfahrt! Begleite uns auf einer malerischen Reise durch die historischen Grachten Amsterdams. Entlang der Route entdeckst du 16 ikonische Wahrzeichen, testest dein Wissen mit Grachten-Quizfragen und fängst deine eigenen Erinnerungen dieser unvergesslichen Tour ein. Lade an jedem Stop Fotos hoch, beantworte die Umfragen und teile deine Gedanken, um Punkte zu sammeln und in der Rangliste aufzusteigen!`;
+export const TRIP_DESCRIPTION = `Willkommen zur Amsterdam Grachtenfahrt! Begleite uns auf einer malerischen Reise durch die historischen Grachten Amsterdams. Entlang der Route entdeckst du 16 ikonische Wahrzeichen und fotografierst typisch holländische Dinge, testest dein Wissen mit Grachten-Quizfragen und fängst deine eigenen Erinnerungen dieser unvergesslichen Tour ein. Lade an jedem Stop Fotos hoch, beantworte die Umfragen und teile deine Gedanken, um Punkte zu sammeln und in der Rangliste aufzusteigen!`;
 
 export const PHOTO_SPOTS = [
   { label: 'Anne-Frank Huis', detail: 'Im Hinterhaus des Prinsengracht 263 schrieb Anne Frank ihr berühmtes Tagebuch. Der Westertoren schlug die Viertelstunden, die sie im Versteck hörte.' },
@@ -17,6 +17,21 @@ export const PHOTO_SPOTS = [
   { label: 'Stadsarchief Amsterdam (De Bazel)', detail: 'Das Gebäude „De Bazel" wurde 1926 als Bankgebäude entworfen und gilt als Höhepunkt der Amsterdamer Schule. Heute beherbergt es das Stadtarchiv mit Originaldokumenten aus 700 Jahren Stadtgeschichte.' },
   { label: 'De Nationale Opera & Ballet', detail: 'Das Gebäude am Waterlooplein wurde 1986 eröffnet und hat die größte Bühne der Niederlande. Hier residieren sowohl die Niederländische Oper als auch das Het Nationale Ballet.' },
   { label: 'Eye', detail: 'Das Eye Filmmuseum hat die Form eines riesigen weißen Diakastens und reflects light wie eine Kinoleinwand. Drinnen gibt es eine Filmothek, in der man kostenlos tausende Filme schauen kann.' },
+];
+
+export const THINGS_SPOTS = [
+  { label: 'Das schiefste Haus' },
+  { label: 'Das dünnste Haus' },
+  { label: 'Das schönste Haus' },
+  { label: 'Das schönste Boot' },
+  { label: 'Ein Detail, was etwas über den Zustand der Grachten verrät' },
+  { label: 'Ein Beispiel für fahrradgerechte Verkehrsführung' },
+  { label: 'Ein Beispiel für eine autogerechte Stadt' },
+  { label: 'Eine Sache die dir besonders ins Auge sticht' },
+  { label: 'Die schönste Brücke' },
+  { label: 'Die Brücke mit den meisten Fahrrädern' },
+  { label: 'Etwas was du besonders Schön findest' },
+  { label: 'Etwas was dir überhaupt nicht gefällt' },
 ];
 
 export type PollQuestion = {
@@ -80,4 +95,4 @@ export const POLL_QUESTIONS: PollQuestion[] = [
 
 import { MAX_BONUS_UPLOADS } from '@/lib/supabase';
 
-export const MAX_POINTS = PHOTO_SPOTS.length + POLL_QUESTIONS.length + MAX_BONUS_UPLOADS + 1;
+export const MAX_POINTS = PHOTO_SPOTS.length + THINGS_SPOTS.length + POLL_QUESTIONS.length + MAX_BONUS_UPLOADS + 1;

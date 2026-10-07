@@ -6,7 +6,8 @@ import ImageModal from '@/components/ImageModal';
 type PhotoSpotProps = {
   spotIndex: number;
   label: string;
-  detail: string;
+  detail?: string;
+  showFunFact?: boolean;
   user: GrachtenUser;
   existingPhotoUrl: string | null;
   onUploaded: (url: string) => void;
@@ -17,6 +18,7 @@ export default function PhotoSpot({
   spotIndex,
   label,
   detail,
+  showFunFact = true,
   user,
   existingPhotoUrl,
   onUploaded,
@@ -61,7 +63,7 @@ export default function PhotoSpot({
 
       setPhotoUrl(url);
       onUploaded(url);
-      setShowDetail(true);
+      if (showFunFact) setShowDetail(true);
     } catch (err) {
       console.error('Upload failed:', err);
       alert('Upload fehlgeschlagen. Bitte versuche es erneut.');
@@ -114,7 +116,7 @@ export default function PhotoSpot({
           }}
         />
       </div>
-      {showDetail && (
+      {showDetail && detail && (
         <div className="bg-green-600 rounded-2xl px-3 py-2 animate-slide-in-left">
           <p className="text-white text-xs leading-relaxed">{detail}</p>
         </div>
