@@ -8,6 +8,7 @@ type PhotoSpotProps = {
   label: string;
   detail?: string;
   showFunFact?: boolean;
+  isAdmin?: boolean;
   user: GrachtenUser;
   existingPhotoUrl: string | null;
   onUploaded: (url: string) => void;
@@ -19,6 +20,7 @@ export default function PhotoSpot({
   label,
   detail,
   showFunFact = true,
+  isAdmin = false,
   user,
   existingPhotoUrl,
   onUploaded,
@@ -27,7 +29,7 @@ export default function PhotoSpot({
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(existingPhotoUrl);
-  const [showDetail, setShowDetail] = useState(false);
+  const [showDetail, setShowDetail] = useState(isAdmin && showFunFact);
   const [modalSrc, setModalSrc] = useState<string | null>(null);
 
   const handleFile = async (file: File) => {

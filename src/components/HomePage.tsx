@@ -267,6 +267,7 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
               label={spot.label}
               detail={spot.detail}
               user={user}
+              isAdmin={isAdmin}
               existingPhotoUrl={photoUrls[i] ?? null}
               onUploaded={(url) => handlePhotoUploaded(i, url)}
               disabled={disabledItems.photoSpots.has(i)}
@@ -310,6 +311,7 @@ export default function HomePage({ user, onSubmitResults, onLogout }: HomePagePr
               isCorrect={pollAnswers[i]?.correct ?? null}
               onSelect={(opt) => handlePollAnswer(i, opt)}
               disabled={disabledItems.pollQuestions.has(i)}
+              isAdmin={isAdmin}
             />
           ))}
         </div>

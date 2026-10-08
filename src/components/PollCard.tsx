@@ -8,6 +8,7 @@ type PollCardProps = {
   isCorrect: boolean | null;
   onSelect: (optionIndex: number) => void;
   disabled?: boolean;
+  isAdmin?: boolean;
 };
 
 export default function PollCard({
@@ -17,6 +18,7 @@ export default function PollCard({
   isCorrect,
   onSelect,
   disabled = false,
+  isAdmin = false,
 }: PollCardProps) {
   const answered = selectedOption !== null;
 
@@ -28,7 +30,7 @@ export default function PollCard({
       <div className="grid grid-cols-1 gap-2">
         {poll.options.map((option, i) => {
           const isSelected = selectedOption === i;
-          const showCorrect = answered && i === poll.correctIndex;
+          const showCorrect = (answered || isAdmin) && i === poll.correctIndex;
           const showWrong = answered && isSelected && !isCorrect;
 
           return (
