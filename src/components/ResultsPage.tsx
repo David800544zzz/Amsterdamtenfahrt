@@ -293,10 +293,17 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('Diesen Benutzer und alle seine Daten löschen? Dies kann nicht rückgängig gemacht werden.')) return;
     try {
-      const { data: photos } = await supabase.from('grachten_photos').select('storage_path').eq('user_id', userId);
-      if (photos && photos.length > 0) {
-        await supabase.storage.from(PHOTO_BUCKET).remove(photos.map((p) => p.storage_path));
+      const { data: listed } = await supabase.storage.from(PHOTO_BUCKET).list(userId);
+      if (listed && listed.length > 0) {
+        await supabase.storage.from(PHOTO_BUCKET).remove(listed.map((f) => `${userId}/${f.name}`));
       }
+      await supabase.from('grachten_post_likes').delete().eq('voter_id', userId);
+      await supabase.from('grachten_post_likes').delete().eq('target_user_id', userId);
+      await supabase.from('grachten_post_favorites').delete().eq('voter_id', userId);
+      await supabase.from('grachten_post_favorites').delete().eq('target_user_id', userId);
+      await supabase.from('grachten_photos').delete().eq('user_id', userId);
+      await supabase.from('grachten_poll_answers').delete().eq('user_id', userId);
+      await supabase.from('grachten_text_entries').delete().eq('user_id', userId);
       await supabase.from('grachten_users').delete().eq('id', userId);
       loadResults();
     } catch (err) {
