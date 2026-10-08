@@ -63,6 +63,7 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
   const [disabledItems, setDisabledItems] = useState<DisabledSet>({ photoSpots: new Set(), pollQuestions: new Set() });
   const [modalSrc, setModalSrc] = useState<string | null>(null);
   const [adminData, setAdminData] = useState<RankedUser | null>(null);
+  const [myAnsweredPolls, setMyAnsweredPolls] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadResults();
@@ -100,6 +101,11 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
         .map((f) => f.target_user_id);
       setVoterLikes(myLikes);
       setVoterFavorites(myFavs);
+
+      const myAnswered = new Set(
+        allPolls.filter((p) => p.user_id === currentUser.id).map((p) => p.poll_index),
+      );
+      setMyAnsweredPolls(myAnswered);
 
       const visibleUsers = allUsers.filter((u) => u.username !== ADMIN_USERNAME);
 
@@ -486,7 +492,7 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
                                   </p>
                                   <div className="flex items-center gap-2">
                                     <p className="text-white/60 text-xs">
-                                      Antwort: {poll.options[ans.selected_option]}
+                                      Antwort: {myAnsweredPolls.has(ans.poll_index) ? poll.options[ans.selected_option] : '?'}
                                     </p>
                                     <span
                                       className={`text-xs font-bold ${
@@ -723,7 +729,7 @@ export default function ResultsPage({ currentUser, onBack, isAdmin, onLogout }: 
                                     </p>
                                     <div className="flex items-center gap-2">
                                       <p className="text-white/60 text-xs">
-                                        Antwort: {poll.options[ans.selected_option]}
+                                        Antwort: {isAdmin || myAnsweredPolls.has(ans.poll_index) ? poll.options[ans.selected_option] : '?'}
                                       </p>
                                       <span
                                         className={`text-xs font-bold ${
