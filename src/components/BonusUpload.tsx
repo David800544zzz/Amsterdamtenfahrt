@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Camera } from 'lucide-react';
 import { supabase, PHOTO_BUCKET, BONUS_SPOT_BASE, MAX_BONUS_UPLOADS, type GrachtenUser } from '@/lib/supabase';
+import { compressImage } from '@/lib/compressImage';
 
 type BonusUploadProps = {
   user: GrachtenUser;
@@ -18,13 +19,13 @@ export default function BonusUpload({ user, uploadedCount, onUploaded }: BonusUp
   const handleFile = async (file: File) => {
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
+      const compressed = await compressImage(file);
       const spotIndex = BONUS_SPOT_BASE + uploadedCount;
-      const path = `${user.id}/bonus_${uploadedCount}.${ext}`;
+      const path = `${user.id}/bonus_${uploadedCount}.jpg`;
 
       const { error: upErr } = await supabase.storage
         .from(PHOTO_BUCKET)
-        .upload(path, file, { upsert: true });
+        .upload(path, compressed, { upsert: true });
 
       if (upErr) throw upErr;
 

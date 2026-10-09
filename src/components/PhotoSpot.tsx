@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Camera, Check, Maximize2 } from 'lucide-react';
 import { supabase, PHOTO_BUCKET, type GrachtenUser } from '@/lib/supabase';
 import ImageModal from '@/components/ImageModal';
+import { compressImage } from '@/lib/compressImage';
 
 type PhotoSpotProps = {
   spotIndex: number;
@@ -35,8 +36,8 @@ export default function PhotoSpot({
   const handleFile = async (file: File) => {
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${user.id}/spot_${spotIndex}.${ext}`;
+      const compressed = await compressImage(file);
+      const path = `${user.id}/spot_${spotIndex}.jpg`;
 
       if (existingPhotoUrl) {
         const oldPath = `${user.id}/spot_${spotIndex}`;
@@ -45,7 +46,7 @@ export default function PhotoSpot({
 
       const { error: upErr } = await supabase.storage
         .from(PHOTO_BUCKET)
-        .upload(path, file, { upsert: true });
+        .upload(path, compressed, { upsert: true });
 
       if (upErr) throw upErr;
 
